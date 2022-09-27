@@ -1,3 +1,3 @@
-# Djngo_twitter
+# Django_twitter
 
 A backend project using django to build a twitter-like app
