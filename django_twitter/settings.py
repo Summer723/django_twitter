@@ -76,10 +76,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'twitter',
-        'HOST': '0.0.0.0',
+        'HOST': 'localhost',
         'PORT': '3306',
         'USER': 'root',
-        'PASSWORD': 'yourpassword',    # 这里是自己下载mysql时候输入两次的那个密码
+        'PASSWORD': '123456',    # 这里是自己下载mysql时候输入两次的那个密码
     }
 }
 
