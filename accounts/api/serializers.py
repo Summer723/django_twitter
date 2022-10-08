@@ -25,7 +25,7 @@ class SignupSerializer(serializers.ModelSerializer):
         fields = ("username", "password", 'email')
 
 
-    # will be called when is_validate is called
+    # will be called when is_valid is called
 
     def validate(self, data):
         if User.objects.filter(username=data['username'].lower()).exists():
