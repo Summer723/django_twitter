@@ -10,6 +10,12 @@ class UserSerializer(serializers.ModelSerializer):
 # check whether username and password exist
 
 
+class UserSerializerForTweets(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'username')
+
+
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()
