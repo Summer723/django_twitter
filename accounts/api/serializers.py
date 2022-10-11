@@ -32,7 +32,6 @@ class SignupSerializer(serializers.ModelSerializer):
 
 
     # will be called when is_validate is called
-
     def validate(self, data):
         if User.objects.filter(username=data['username'].lower()).exists():
             raise exceptions.ValidationError({
