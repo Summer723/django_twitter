@@ -23,6 +23,9 @@ class TweetViewSet(viewsets.GenericViewSet,
         if "user_id" not in request.query_params:
             return Response('Missing user_id', status=400)
 
+        # here if you visit localhost:8000/api/tweets/?user_id = 1
+        # it shows you the tweets user#1 made and they are ordered by
+        # "-created_at"
         tweets = Tweet.objects.filter(
             user_id=request.query_params['user_id']
         ).order_by('-created_at')
