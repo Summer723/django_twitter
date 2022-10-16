@@ -20,3 +20,30 @@ class FollowingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Friendship
         fields = ["user", 'created_at']
+
+class FriendshipSerializerForCreate(serializers.ModelSerializer):
+    from_user_id = serializers.IntegerField()
+    to_user_id = serializers.IntegerField()
+
+    class Meta:
+        model = Friendship
+        fields = ('from_user_id', 'to_user_id')
+    def validate(self, attrs):
+        if attrs['from_user_id'] == attrs['to_user_id']:
+            raise ValidationError({
+                'message' : 'from_user_id and to_user_id should be different',
+            })
+        if Friendship.objects.filter(
+            from_user_id=attrs['from_user_id'],
+            to_user_id=attrs['to_user_id'],
+        ).exists():
+            raise ValidationError({
+                'message': 'You have already followed the user!',
+            })
+        return attrs
+
+    def create(self, validated_data):
+        return Friendship.objects.create(
+            from_user_id=validated_data['from_user_id'],
+            to_user_id=validated_data['to_user_id'],
+        )
