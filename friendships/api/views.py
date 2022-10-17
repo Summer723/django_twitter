@@ -83,14 +83,6 @@ class FriendshipViewSet(viewsets.GenericViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if not Friendship.objects.filter(from_user=request.user, to_user=pk).exists():
-            return Response({
-                'success': False,
-                'message': "You do not follow this user"
-            },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
         deleted, _ = Friendship.objects.filter(
             from_user=request.user.id,
             to_user=unfollow_user,
