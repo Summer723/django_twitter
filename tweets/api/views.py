@@ -3,6 +3,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from tweets.api.serializers import TweetSerializer, TweetSerializerForCreate
 from tweets.models import Tweet
+from newsfeeds.services import NewsFeedService
+
 
 # 尽量少用ModelViewSet 因为不是每个人都有增删查改的权限
 class TweetViewSet(viewsets.GenericViewSet,
@@ -12,12 +14,10 @@ class TweetViewSet(viewsets.GenericViewSet,
     serializer_class = TweetSerializerForCreate
     #serializer_class = TweetSerializer
 
-
     def get_permissions(self):
         if self.action == "list":
             return [AllowAny()]
         return [IsAuthenticated()]
-
 
     def list(self, request):
         if "user_id" not in request.query_params:
@@ -47,5 +47,6 @@ class TweetViewSet(viewsets.GenericViewSet,
             }, status=400)
 
         tweet = serializer.save()
+        NewsFeedService.fanout_to_followers(tweet)
         return Response(TweetSerializer(tweet).data, status=201)
 
