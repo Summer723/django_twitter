@@ -73,7 +73,7 @@ class FriendshipViewSet(viewsets.GenericViewSet):
 
     @action(methods=["POST"], detail=True, permission_classes=[IsAuthenticated])
     def unfollow(self, request, pk):
-        unfollow_user= self.get_object()
+        unfollow_user = self.get_object()
         if request.user.id == unfollow_user.id:
             return Response(
                 {
@@ -88,8 +88,6 @@ class FriendshipViewSet(viewsets.GenericViewSet):
             to_user=unfollow_user,
         ).delete()
         return Response({"success": True, 'deleted': deleted})
-
-
 
     # we can rewrite list to implement followings and followers
     def list(self, request):

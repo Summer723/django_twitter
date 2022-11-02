@@ -15,8 +15,10 @@ class UserSerializerForTweets(serializers.ModelSerializer):
         model = User
         fields = ('id', 'username')
 
+
 class UserSerializerForFriendship(UserSerializerForTweets):
     pass
+
 
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
@@ -31,7 +33,6 @@ class SignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("username", "password", 'email')
-
 
     # will be called when is_validate is called
     def validate(self, data):

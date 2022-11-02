@@ -27,7 +27,6 @@ class TweetViewSet(viewsets.GenericViewSet,
         # it shows you the tweets user#1 made and they are ordered by
         # "-created_at"
         tweets = Tweet.objects.filter(
-    
             user_id=request.query_params['user_id']
         ).order_by('-created_at')
 
