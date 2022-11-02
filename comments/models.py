@@ -17,7 +17,7 @@ class Comment(models.Model):
     def __str__(self):
         return '{} - {} Says {} under the Tweet {}'.format(
             self.created_at,
-            self.user
+            self.user,
             self.content,
             self.tweet,
         )

@@ -9,11 +9,13 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'username', 'email')
 # check whether username and password exist
 
-
 class UserSerializerForTweets(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username')
+
+class UserSerializerForComments(UserSerializerForTweets):
+    pass
 
 
 class UserSerializerForFriendship(UserSerializerForTweets):
