@@ -73,7 +73,6 @@ class AccountApiTests(TestCase):
         response = self.client.get(LOGIN_STATUS_URL)
         self.assertEqual(response.data["has_logged_in"], False)
 
-
     def test_signup(self):
         user_info = {
             'username': "somebody",
