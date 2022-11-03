@@ -8,6 +8,7 @@ from comments.api.serializers import (
     CommentSerializerForUpdate,
 )
 from comments.api.permissions import IsObjectOwner
+from tweets.api.serializers import TweetSerializerWithComments
 
 
 class CommentViewSet(viewsets.GenericViewSet):
@@ -20,6 +21,7 @@ class CommentViewSet(viewsets.GenericViewSet):
         if self.action in ['update', 'destroy']:
             return [IsAuthenticated(), IsObjectOwner()]
         return [AllowAny()]
+
 
     def list(self, request, *args, **kwargs):
         if "tweet_id" not in request.query_params:
