@@ -16,7 +16,7 @@ class TweetApiTests(TestCase):
         self.user1 = self.create_user('user1', 'user1@twitter.com')
         self.tweets1 = [
             self.create_tweet(self.user1)
-            for i in range (3)
+            for i in range(3)
         ]
 
         self.user1_client = APIClient()
