@@ -21,6 +21,20 @@ class CommentViewSet(viewsets.GenericViewSet):
             return [IsAuthenticated(), IsObjectOwner()]
         return [AllowAny()]
 
+    def list(self, request, *args, **kwargs):
+        if "tweet_id" not in request.query_params:
+            return Response({
+                "Message": 'Missing tweet_id',
+                'Success': False,
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        comments = Comment.objects.filter(
+            tweet_id=request.query_params['tweet_id']
+        ).order_by('-created_at')
+
+        serializer = CommentSerializer(comments, many=True)
+        return Response({'comments': serializer.data}, status=status.HTTP_200_OK)
+
     def create(self, request, *args, **kwargs):
         data = {
             'user_id': request.user.id,
@@ -68,7 +82,6 @@ class CommentViewSet(viewsets.GenericViewSet):
     def destroy(self, request, *args, **kwargs):
         comment = self.get_object()
         comment.delete()
-
         return Response({'success': True}, status=status.HTTP_200_OK)
 
 
