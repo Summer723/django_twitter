@@ -15,12 +15,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from django.conf import settings
 from rest_framework import routers
 from accounts.api import views
 from tweets.api.views import TweetViewSet
 from friendships.api.views import FriendshipViewSet
 from newsfeeds.api.views import NewsFeedViewSet
 from comments.api.views import CommentViewSet
+import debug_toolbar
 
 router = routers.DefaultRouter()
 router.register(r'api/users', views.UserViewSet)
@@ -35,4 +37,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path('__debug__/', include(debug_toolbar.urls)),
 ]
