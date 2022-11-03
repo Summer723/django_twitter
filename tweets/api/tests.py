@@ -10,9 +10,6 @@ TWEET_RETRIEVE_API = '/api/tweets/{}/'
 class TweetApiTests(TestCase):
 
     def setUp(self):
-        # create three uses
-        #self.anonymous_client = APIClient()
-
         # create use1 and his tweets
         self.user1 = self.create_user('user1', 'user1@twitter.com')
         self.tweets1 = [
@@ -82,7 +79,6 @@ class TweetApiTests(TestCase):
         response = self.user1_client.get(TWEET_RETRIEVE_API.format(self.tweet.id))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data['comments']), 0)
-
 
         self.create_comment(self.user1, self.tweet, "i love it")
         self.create_comment(self.user2, self.tweet, "me too")
