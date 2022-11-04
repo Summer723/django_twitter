@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from tweets.models import Tweet
 from rest_framework.test import APIClient
 from comments.models import Comment
+from likes.models import Like
+from django.contrib.contenttypes.models import ContentType
 
 
 class TestCase(DjangoTestCase):
@@ -32,3 +34,15 @@ class TestCase(DjangoTestCase):
         if content is None:
             content = "A default comment!"
         return Comment.objects.create(user=user, tweet=tweet, content=content)
+
+    def create_like(self, user, target):
+        # this returns the instance and whether it is newly created or not 
+        instance, _ = Like.objects.get_or_create(
+            # here we throw in the name of the class, which is a model, which is not
+            # what we need
+            # then, get_for_model will return its content type, which is what we need
+            content_type=ContentType.objects.get_for_model(target.__class__),
+            user=user,
+            object_id=target.id,
+        )
+        return instance

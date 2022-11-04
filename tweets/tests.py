@@ -3,6 +3,7 @@ from django.test import TestCase
 from tweets.models import Tweet
 from datetime import timedelta
 from utils.time_helpers import utc_now
+from testing.testcases import TestCase
 
 
 # Create your tests here.
@@ -14,3 +15,19 @@ class TweetTests(TestCase):
         tweet.created_at = utc_now() - timedelta(hours=10)
         tweet.save()
         self.assertEqual(tweet.hours_to_now,10)
+
+    def setUp(self):
+        self.summer = self.create_user('summer')
+        self.tweet = self.create_tweet(self.summer, content="This is a test for tweet!")
+        self.comment = self.create_comment(self.summer, self.tweet, content="This is a test for comment!")
+
+    def test_like_set(self):
+        self.create_like(self.summer, self.tweet)
+        self.assertEqual(self.tweet.like_set.count(), 1)
+
+        self.create_like(self.summer, self.tweet)
+        self.assertEqual(self.tweet.like_set.count(), 1)
+
+        self.create_like(self.create_user('random'), self.tweet)
+        self.assertEqual(self.tweet.like_set.count(), 2)
+
