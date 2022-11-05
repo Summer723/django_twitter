@@ -2,6 +2,7 @@ from rest_framework import serializers
 from tweets.models import Tweet
 from accounts.api.serializers import UserSerializer,UserSerializerForTweets
 from comments.api.serializers import CommentSerializer
+from likes.api.serializers import LikeSerializer
 
 class TweetSerializer(serializers.ModelSerializer):
     user = UserSerializerForTweets()
@@ -10,13 +11,14 @@ class TweetSerializer(serializers.ModelSerializer):
         model = Tweet
         fields = ('id', 'user', 'created_at', 'content')
 
-class TweetSerializerWithComments(serializers.ModelSerializer):
+class TweetSerializerWithCommentsAndLikes(serializers.ModelSerializer):
     user = UserSerializer()
     comments = CommentSerializer(source='comment_set', many=True)
+    likes = LikeSerializer(source='like_set', many=True)
 
     class Meta:
         model = Tweet
-        fields = ('id', 'user', 'comments', 'created_at', 'content')
+        fields = ('id', 'user', 'comments', "likes", 'created_at', 'content')
 
 class TweetSerializerForCreate(serializers.ModelSerializer):
     content = serializers.CharField(min_length=6,max_length=140)
