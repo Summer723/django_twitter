@@ -8,7 +8,7 @@ from comments.api.serializers import (
     CommentSerializerForUpdate,
 )
 from comments.api.permissions import IsObjectOwner
-from tweets.api.serializers import TweetSerializerWithComments
+from tweets.api.serializers import TweetSerializerWithCommentsAndLikes
 
 
 class CommentViewSet(viewsets.GenericViewSet):

@@ -1,5 +1,6 @@
 from likes.api.serializers import (
     LikeSerializer,
+    LikeSerializerForCancel,
     LikeSerializerForCreate,
 )
 from likes.models import Like
@@ -31,4 +32,25 @@ class LikeViewSet(viewsets.GenericViewSet):
             LikeSerializer(instance).data,
             status=status.HTTP_201_CREATED,
         )
+
+    @action(methods=['POST'], detail=False)
+    @required_params(request_attr='data', params=['content_type', 'object_id'])
+    def cancel(self, request, *args, **kwargs):
+        serializer = LikeSerializerForCancel(
+            data=request.data,
+            context={'request': request},
+        )
+        if not serializer.is_valid():
+            return Response({
+                'message': 'Please check input',
+                'errors': serializer.errors,
+            }, status=status.HTTP_400_BAD_REQUEST)
+        deleted = serializer.cancel()
+        return Response(
+            {'success': True, "deleted": deleted},
+            status=status.HTTP_200_OK,
+        )
+
+
+
 
