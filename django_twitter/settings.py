@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'debug_toolbar',
+    'notifications',
 
     # models
     'tweets',
@@ -49,6 +50,7 @@ INSTALLED_APPS = [
     'newsfeeds',
     'comments',
     'likes',
+
 ]
 
 REST_FRAMEWORK = {

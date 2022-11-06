@@ -24,7 +24,6 @@ class BaseLikeSerializerForCreateAndCancel(serializers.ModelSerializer):
         model = Like
         fields = ('content_type', 'object_id')
 
-
     def _get_model_class(self, data):
         if data['content_type'] == "comment":
             return Comment
@@ -45,15 +44,15 @@ class BaseLikeSerializerForCreateAndCancel(serializers.ModelSerializer):
 
 
 class LikeSerializerForCreate(BaseLikeSerializerForCreateAndCancel):
-    def create(self, validated_data):
+    def get_or_create(self):
+        validated_data = self.validated_data
         model_class = self._get_model_class(validated_data)
-        instance, _ = Like.objects.get_or_create(
+        return  Like.objects.get_or_create(
             # ContentType.objects.get_for_model get the content type of the class
             content_type=ContentType.objects.get_for_model(model_class),
             object_id=validated_data['object_id'],
             user=self.context['request'].user,
         )
-        return instance
 
 
 class LikeSerializerForCancel(BaseLikeSerializerForCreateAndCancel):
