@@ -6,12 +6,14 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from tweets.models import Tweet
 
+
 class LikeSerializer(serializers.ModelSerializer):
     user = UserSerializer()
 
     class Meta:
         model = Like
         fields = ("user", "created_at")
+
 
 class BaseLikeSerializerForCreateAndCancel(serializers.ModelSerializer):
     # it takes two things
@@ -21,6 +23,7 @@ class BaseLikeSerializerForCreateAndCancel(serializers.ModelSerializer):
     class Meta:
         model = Like
         fields = ('content_type', 'object_id')
+
 
     def _get_model_class(self, data):
         if data['content_type'] == "comment":
@@ -40,6 +43,7 @@ class BaseLikeSerializerForCreateAndCancel(serializers.ModelSerializer):
             raise ValidationError({"object_id": 'Object does not exist!'})
         return data
 
+
 class LikeSerializerForCreate(BaseLikeSerializerForCreateAndCancel):
     def create(self, validated_data):
         model_class = self._get_model_class(validated_data)
@@ -50,6 +54,7 @@ class LikeSerializerForCreate(BaseLikeSerializerForCreateAndCancel):
             user=self.context['request'].user,
         )
         return instance
+
 
 class LikeSerializerForCancel(BaseLikeSerializerForCreateAndCancel):
     def cancel(self):

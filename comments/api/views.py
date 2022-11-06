@@ -8,7 +8,7 @@ from comments.api.serializers import (
     CommentSerializerForUpdate,
 )
 from comments.api.permissions import IsObjectOwner
-from tweets.api.serializers import TweetSerializerWithCommentsAndLikes
+
 
 
 class CommentViewSet(viewsets.GenericViewSet):
@@ -34,7 +34,11 @@ class CommentViewSet(viewsets.GenericViewSet):
             tweet_id=request.query_params['tweet_id']
         ).order_by('-created_at')
 
-        serializer = CommentSerializer(comments, many=True)
+        serializer = CommentSerializer(
+            comments,
+            context={'request':request},
+            many=True,
+        )
         return Response({'comments': serializer.data}, status=status.HTTP_200_OK)
 
     def create(self, request, *args, **kwargs):
@@ -54,7 +58,7 @@ class CommentViewSet(viewsets.GenericViewSet):
 
         comment = serializer.save()
         return Response(
-            CommentSerializer(comment).data,
+            CommentSerializer(comment, context={'request': request}).data,
             status=status.HTTP_201_CREATED,
         )
 
@@ -76,10 +80,9 @@ class CommentViewSet(viewsets.GenericViewSet):
         # thus serializer will call update and renew it
         comment = serializer.save()
         return Response(
-            CommentSerializer(comment).data,
+            CommentSerializer(comment, context={'request': request}).data,
             status=status.HTTP_200_OK,
         )
-
 
     def destroy(self, request, *args, **kwargs):
         comment = self.get_object()
