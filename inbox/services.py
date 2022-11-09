@@ -13,7 +13,7 @@ class NotificationService(object):
         if like.user == target.user:
             return
 
-        if like.content_type == ContentType.objects.get_for_model(Comment):
+        if like.content_type == ContentType.objects.get_for_model(Tweet):
             notify.send(
                 like.user,
                 recipient=target.user,
@@ -21,7 +21,7 @@ class NotificationService(object):
                 target=target,
             )
 
-        if like.content_type == ContentType.objects.get_for_model(Tweet):
+        if like.content_type == ContentType.objects.get_for_model(Comment):
             notify.send(
                 like.user,
                 recipient=target.user,
@@ -38,6 +38,6 @@ class NotificationService(object):
         notify.send(
             comment.user,
             recipient=comment.tweet.user,
-            verb="liked your comment",
+            verb="commented your tweet",
             target=comment.tweet,
         )
