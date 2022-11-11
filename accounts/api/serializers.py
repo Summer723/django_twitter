@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User, Group
+from accounts.models import UserProfile
 from rest_framework import serializers
 from rest_framework import exceptions
 
@@ -59,4 +60,5 @@ class SignupSerializer(serializers.ModelSerializer):
             email=email,
             password=password,
         )
+        user.profile
         return user
