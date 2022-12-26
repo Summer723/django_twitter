@@ -9,10 +9,8 @@ class IsObjectOwner(BasePermission):
     """
     message = "You do not have the permission to access this object!"
 
-
     def has_permission(self, request, view):
         return True
-
 
     def has_object_permission(self, request, view, obj):
         return request.user == obj.user

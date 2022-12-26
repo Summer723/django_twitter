@@ -2,13 +2,14 @@ from testing.testcases import TestCase
 from rest_framework.test import APIClient
 from django.contrib.auth.models import User
 from accounts.models import UserProfile
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 
 LOGIN_URL = '/api/accounts/login/'
 LOGOUT_URL = '/api/accounts/logout/'
 SIGNUP_URL = '/api/accounts/signup/'
 LOGIN_STATUS_URL = '/api/accounts/login_status/'
-
+USER_PROFILE_DETAIL_URL = "/api/profiles/{}/"
 
 class AccountApiTests(TestCase):
 
@@ -49,7 +50,8 @@ class AccountApiTests(TestCase):
         })
         self.assertEqual(response.status_code, 200)
         self.assertNotEqual(response.data['user'], None)
-        self.assertEqual(response.data['user']['email'], 'admin@jiuzhang.com')
+        # self.assertEqual(response.data['user']['email'], 'admin@jiuzhang.com')
+        self.assertEqual(response.data['user']['id'], self.user.id)
         # 验证已经登录了
         response = self.client.get(LOGIN_STATUS_URL)
         self.assertEqual(response.data['has_logged_in'], True)
@@ -121,3 +123,37 @@ class AccountApiTests(TestCase):
         # check signin info
         response = self.client.get(LOGIN_STATUS_URL)
         self.assertEqual(response.data['has_logged_in'], True)
+
+
+class UserProfileAPITests(TestCase):
+    def test_update(self):
+        summer, summer_client = self.create_user_and_client('summer')
+        prof = summer.profile
+        prof.nickname = "old nickname"
+        prof.save()
+        url = USER_PROFILE_DETAIL_URL.format(prof.id)
+
+        _,wang_client = self.create_user_and_client('wang')
+        response = wang_client.put(url, {"nickname":'new nickname',})
+
+        self.assertEqual(response.status_code, 403)
+        prof.refresh_from_db()
+        self.assertEqual(prof.nickname, 'old nickname')
+
+        response = summer_client.put(url, {"nickname": 'new nickname', })
+        self.assertEqual(response.status_code, 200)
+        prof.refresh_from_db()
+        self.assertEqual(prof.nickname, 'new nickname')
+
+        response = summer_client.put(url, {
+            'avatar': SimpleUploadedFile(
+                name='my-avatar.jpg',
+                content=str.encode('a fake image'),
+                content_type='image/jpeg',
+            ),
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual('my-avatar' in response.data['avatar'], True)
+        prof.refresh_from_db()
+        self.assertIsNotNone(prof.avatar)
+
