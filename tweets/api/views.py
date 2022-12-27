@@ -6,6 +6,7 @@ from tweets.api.serializers import (TweetSerializer, \
                                     TweetSerializerForDetails,)
 from tweets.models import Tweet
 from newsfeeds.services import NewsFeedService
+from utils.paginations import EndlessPagination
 
 
 # 尽量少用ModelViewSet 因为不是每个人都有增删查改的权限
@@ -14,6 +15,7 @@ class TweetViewSet(viewsets.GenericViewSet,
                    viewsets.mixins.ListModelMixin):
     queryset = Tweet.objects.all()
     serializer_class = TweetSerializerForCreate
+    pagination_class = EndlessPagination
 
     def get_permissions(self):
         if self.action in ["list", "retrieve"]:
@@ -34,9 +36,10 @@ class TweetViewSet(viewsets.GenericViewSet,
         tweets = Tweet.objects.filter(
             user_id=request.query_params['user_id']
         ).order_by('-created_at')
+        tweets = self.paginate_queryset(tweets)
 
         serializer = TweetSerializer(tweets, context={'request': request}, many=True)
-        return Response({'tweets': serializer.data})
+        return self.get_paginated_response(data=serializer.data)
 
     def create(self, request, *args, **kwargs):
         serializer = TweetSerializerForCreate(
