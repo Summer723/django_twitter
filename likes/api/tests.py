@@ -19,7 +19,7 @@ class LikeApiTests(TestCase):
     def test_tweet_likes(self):
         # test when it does not specifies content type
         tweet = self.create_tweet(self.wang)
-        data = {"content_type": 'tweet', 'object_id':tweet.id}
+        data = {"content_type": 'tweet', 'object_id': tweet.id}
         response = self.anonymous_client.post(LIKE_BASE_URL, data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
