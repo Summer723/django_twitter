@@ -6,9 +6,14 @@ from comments.models import Comment
 from likes.models import Like
 from django.contrib.contenttypes.models import ContentType
 from newsfeeds.models import NewsFeed
+from django.core.cache import caches
+
 
 
 class TestCase(DjangoTestCase):
+
+    def clear_cache(self):
+        caches['testing'].clear()
 
     @property
     def anonymous_client(self):
