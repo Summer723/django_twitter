@@ -14,7 +14,7 @@ class FriendshipApiTests(TestCase):
 
     def setUp(self):
         # self.anonymous_client = APIClient()
-
+        self.clear_cache()
         self.client1 = self.create_user("client1")
         self.client1_client = APIClient()
         self.client1_client.force_authenticate(self.client1)
