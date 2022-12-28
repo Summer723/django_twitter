@@ -29,5 +29,16 @@ class Friendship(models.Model):
     def __str__(self):
         return f'{self.from_user_id} followed {self.to_user_id}'
 
-pre_delete.connect(invalidate_following_cache, sender = Friendship)
-post_save.connect(invalidate_following_cache, sender = Friendship)
+    @property
+    def cached_from_user(self):
+        from accounts.services import UserService
+        return UserService.get_user_through_cache(self.from_user_id)
+
+    @property
+    def cached_to_user(self):
+        from accounts.services import UserService
+        return UserService.get_user_through_cache(self.to_user_id)
+
+
+pre_delete.connect(invalidate_following_cache, sender=Friendship)
+post_save.connect(invalidate_following_cache, sender=Friendship)

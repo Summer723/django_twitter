@@ -10,6 +10,7 @@ class CommentModelTests(TestCase):
         self.assertNotEqual(comment.__str__(), None)
 
     def setUp(self):
+        self.clear_cache()
         self.summer = self.create_user('summer')
         self.tweet = self.create_tweet(self.summer, content="This is a test for tweet!")
         self.comment = self.create_comment(self.summer, self.tweet, content="This is a test for comment!")
