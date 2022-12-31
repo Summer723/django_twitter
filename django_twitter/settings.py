@@ -148,7 +148,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-TESTING = (("".join(sys.argv)).find('manage.py test') != -1)
+TESTING = ((" ".join(sys.argv)).find('manage.py test') != -1)
 if TESTING:
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
@@ -170,6 +170,12 @@ CACHES = {
         'KEY_PREFIX': 'testing',
     },
 }
+
+REDIS_HOST = '127.0.0.1'
+REDIS_PORT = 6379
+REDIS_DB = 0 if TESTING else 1
+REDIS_KEY_EXPIRE_TIME = 7 * 86400
+
 
 try:
     from .local_settings import *
