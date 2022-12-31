@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save, pre_delete
 from utils.listeners import invalidate_object_cache
 from utils.memcached_helper import Memcached_helper
+from friendships.listeners import invalidate_following_cache
 
 # Create your models here.
 class Friendship(models.Model):
@@ -41,5 +42,5 @@ class Friendship(models.Model):
         return Memcached_helper.get_object_through_cache(User, self.to_user_id)
 
 
-pre_delete.connect(invalidate_object_cache, sender=Friendship)
-post_save.connect(invalidate_object_cache, sender=Friendship)
+pre_delete.connect(invalidate_following_cache, sender=Friendship)
+post_save.connect(invalidate_following_cache, sender=Friendship)
