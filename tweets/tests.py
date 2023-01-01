@@ -82,7 +82,6 @@ class TweetServiceTests(TestCase):
         tweets = TweetService.get_cached_tweet(self.summer.id)
         self.assertEqual([t.id for t in tweets], tweets_ids)
 
-
         new_tweet = self.create_tweet(self.summer, content='new tweet')
         tweets_ids.insert(0, new_tweet.id)
         tweets = TweetService.get_cached_tweet(self.summer.id)
