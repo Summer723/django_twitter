@@ -5,8 +5,9 @@ from django.contrib.contenttypes.models import ContentType
 from likes.models import Like
 from tweets.constants import TweetPhotoStatus, TWEET_PHOTO_STATUS_CHOICES
 from utils.memcached_helper import Memcached_helper
-from django.db.models.signals import pre_save,post_delete
+from django.db.models.signals import pre_save, post_delete, post_save
 from utils.listeners import invalidate_object_cache
+from tweets.listeners import push_tweet_to_cache
 
 # Create your models here.
 class Tweet(models.Model):
@@ -78,3 +79,4 @@ class TweetPhoto(models.Model):
 
 pre_save.connect(invalidate_object_cache, sender= Tweet)
 post_delete.connect(invalidate_object_cache, sender=Tweet)
+post_save.connect(push_tweet_to_cache, sender=Tweet)
