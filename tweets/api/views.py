@@ -10,6 +10,7 @@ from utils.paginations import EndlessPagination
 from tweets.services import TweetService
 
 
+
 # 尽量少用ModelViewSet 因为不是每个人都有增删查改的权限
 class TweetViewSet(viewsets.GenericViewSet,
                    viewsets.mixins.CreateModelMixin,
@@ -37,10 +38,15 @@ class TweetViewSet(viewsets.GenericViewSet,
         # tweets = Tweet.objects.filter(
         #     user_id=request.query_params['user_id']
         # ).order_by('-created_at')
-        tweets = TweetService.get_cached_tweet(user_id=request.query_params["user_id"])
-        tweets = self.paginate_queryset(tweets)
+        user_id = request.query_params["user_id"]
+        tweets = TweetService.get_cached_tweet(user_id=user_id)
+        page = self.paginator.paginate_cached_list(tweets, request)
 
-        serializer = TweetSerializer(tweets, context={'request': request}, many=True)
+        if page is None:
+            tweets = Tweet.objects.filter(user_id=user_id).order_by('-created_at')
+            page = self.paginate_queryset(tweets)
+
+        serializer = TweetSerializer(page, context={'request': request}, many=True)
         return self.get_paginated_response(data=serializer.data)
 
     def create(self, request, *args, **kwargs):
