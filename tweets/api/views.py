@@ -7,6 +7,7 @@ from tweets.api.serializers import (TweetSerializer, \
 from tweets.models import Tweet
 from newsfeeds.services import NewsFeedService
 from utils.paginations import EndlessPagination
+from tweets.services import TweetService
 
 
 # 尽量少用ModelViewSet 因为不是每个人都有增删查改的权限
@@ -33,9 +34,10 @@ class TweetViewSet(viewsets.GenericViewSet,
         # here if you visit localhost:8000/api/tweets/?user_id = 1
         # it shows you the tweets user#1 made and they are ordered by
         # "-created_at"
-        tweets = Tweet.objects.filter(
-            user_id=request.query_params['user_id']
-        ).order_by('-created_at')
+        # tweets = Tweet.objects.filter(
+        #     user_id=request.query_params['user_id']
+        # ).order_by('-created_at')
+        tweets = TweetService.get_cached_tweet(user_id=request.query_params["user_id"])
         tweets = self.paginate_queryset(tweets)
 
         serializer = TweetSerializer(tweets, context={'request': request}, many=True)
