@@ -3,13 +3,15 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from utils.memcached_helper import Memcached_helper
+from django.db.models.signals import post_save, pre_delete
+from likes.listeners import incr_likes_count, decr_likes_count
 
 
 # Create your models here.
 class Like(models.Model):
     # from which user
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    object_id = models.PositiveIntegerField() # tweet id or comment id
+    object_id = models.PositiveIntegerField()  # tweet id or comment id
     content_type = models.ForeignKey(
         ContentType,
         on_delete=models.SET_NULL,
@@ -39,3 +41,6 @@ class Like(models.Model):
     def cached_user(self):
         return Memcached_helper.get_object_through_cache(User, self.user_id)
 
+
+post_save.connect(incr_likes_count, sender=Like)
+pre_delete.connect(decr_likes_count, sender=Like)
