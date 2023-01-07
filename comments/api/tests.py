@@ -39,7 +39,7 @@ class CommentApiTests(TestCase):
         self.assertEqual(response.status_code, 400)
 
         response = self.summer_client.post(COMMENT_URL, {"content": '1' * 141})
-        self.assertEqual(response.status_code,400)
+        self.assertEqual(response.status_code, 400)
         self.assertEqual('content' in response.data['errors'], True)
 
         response = self.summer_client.post(COMMENT_URL, {
@@ -49,7 +49,7 @@ class CommentApiTests(TestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.data['user']['id'], self.summer.id)
         self.assertEqual(response.data['tweet_id'], self.tweet.id)
-        self.assertEqual(response.data['content'],"yes")
+        self.assertEqual(response.data['content'], "yes")
 
 
     def test_update(self):
@@ -121,6 +121,47 @@ class CommentApiTests(TestCase):
         self.assertEqual(len(response.data['comments']), 2)
         self.assertEqual(response.data['comments'][0]['content'], 'comment2')
         self.assertEqual(response.data['comments'][1]['content'], 'comment1')
+
+    def test_comments_with_cache(self):
+        tweet_url = '/api/tweets/{}/'.format(self.tweet.id)
+        response = self.summer_client.get(tweet_url)
+        self.assertEqual(self.tweet.comments_count, 0)
+        self.assertEqual(response.data['comments_count'], 0)
+
+        data = {'tweet_id': self.tweet.id, 'content': 'a comment'}
+        for i in range(2):
+            _, client = self.create_user_and_client('user{}'.format(i))
+            client.post(COMMENT_URL, data)
+            response = client.get(tweet_url)
+            self.assertEqual(response.data['comments_count'], i + 1)
+            self.tweet.refresh_from_db()
+            self.assertEqual(self.tweet.comments_count, i + 1)
+
+        comment_data = self.wang_client.post(COMMENT_URL, data).data
+        response = self.wang_client.get(tweet_url)
+        self.assertEqual(response.data["comments_count"], 3)
+        self.tweet.refresh_from_db()
+        self.assertEqual(self.tweet.comments_count, 3)
+
+        update_url = "{}{}/".format(COMMENT_URL, comment_data["id"])
+        response = self.wang_client.put(update_url, {"content": "updated"})
+        self.assertEqual(response.status_code, 200)
+        response = self.wang_client.get(tweet_url)
+        self.assertEqual(response.data["comments_count"], 3)
+        self.tweet.refresh_from_db()
+        self.assertEqual(self.tweet.comments_count, 3)
+
+        response = self.wang_client.delete(update_url)
+        self.assertEqual(response.status_code, 200)
+        response = self.wang_client.get(tweet_url)
+        self.assertEqual(response.data["comments_count"], 2)
+        self.tweet.refresh_from_db()
+        self.assertEqual(self.tweet.comments_count, 2)
+
+
+
+
+
 
 
 

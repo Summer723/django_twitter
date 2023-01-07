@@ -41,4 +41,4 @@ class Comment(models.Model):
 
 
 pre_delete.connect(decr_comments_count, sender=Comment)
-post_save.connect(decr_comments_count, sender=Comment)
+post_save.connect(incr_comments_count, sender=Comment)
