@@ -1,4 +1,3 @@
-from tweets.models import Tweet
 from utils.redis_client import RedisClient
 from utils.redis_serializers import DjangoModelSerializer
 from django.conf import settings
@@ -34,7 +33,6 @@ class RedisHelper:
         cls._load_objects_to_cache(key, queryset)
         return list(queryset)
 
-
     @classmethod
     def push_objects(cls, key, obj, queryset):
         conn = RedisClient.get_connection()
@@ -49,22 +47,7 @@ class RedisHelper:
 
     @classmethod
     def get_count_key(cls, obj, attr):
-        return "{}.{}:{}".format(obj.__class__.__name__, attr, obj.id)
-
-    @classmethod
-    def get_count(cls, obj, attr):
-        conn = RedisClient.get_connection()
-        key = cls.get_count_key(obj, attr)
-
-        count = conn.get(key)
-
-        if conn is not None:
-            return int(count)
-
-        obj.refresh_from_db()
-        count = getattr(obj, attr)
-        conn.set(key, count)
-        return count
+        return '{}.{}:{}'.format(obj.__class__.__name__, attr, obj.id)
 
     @classmethod
     def incr_count(cls, obj, attr):
@@ -93,4 +76,28 @@ class RedisHelper:
         conn.expire(key, settings.REDIS_KEY_EXPIRE_TIME)
         return count
 
+    @classmethod
+    def get_count(cls, obj, attr):
+        conn = RedisClient.get_connection()
+        key = cls.get_count_key(obj, attr)
+        count = conn.get(key)
+        if count is not None:
+            return int(count)
 
+        obj.refresh_from_db()
+        count = getattr(obj, attr)
+        conn.set(key, count)
+        return count
+
+    @classmethod
+    def get_count(cls, obj, attr):
+        conn = RedisClient.get_connection()
+        key = cls.get_count_key(obj, attr)
+
+        if conn.exists(key):
+            return int(conn.get(key))
+
+        obj.refresh_from_db()
+        count = getattr(obj, attr)
+        conn.set(key, count)
+        return count

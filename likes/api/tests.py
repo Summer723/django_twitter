@@ -146,7 +146,6 @@ class LikeApiTests(TestCase):
         self.assertEqual(response.data['has_liked'], True)
         self.assertEqual(response.data['likes_count'], 1)
 
-
         # test newsfeeds list api
         self.create_like(self.wang, tweet)
         self.create_newsfeed(self.wang, tweet)
@@ -161,6 +160,49 @@ class LikeApiTests(TestCase):
         self.assertEqual(len(response.data['likes']), 2)
         self.assertEqual(response.data['likes'][0]['user']['id'], self.wang.id)
         self.assertEqual(response.data['likes'][1]['user']['id'], self.summer.id)
+
+    def test_likes_count_with_cache(self):
+        tweet = self.create_tweet(self.summer)
+        self.create_newsfeed(self.summer, tweet)
+        self.create_newsfeed(self.wang, tweet)
+
+
+        data = {"content_type": 'tweet', 'object_id':tweet.id}
+        tweet_url = TWEET_DETAIL_API.format(tweet.id)
+        for i in range(3):
+            _, client = self.create_user_and_client("client{}".format(i))
+            client.post(LIKE_BASE_URL, data)
+            response = client.get(tweet_url)
+            self.assertEqual(response.data['likes_count'], i + 1)
+            tweet.refresh_from_db()
+            self.assertEqual(tweet.likes_count, i + 1)
+
+
+        tweet_url = '/api/tweets/{}/'.format(tweet.id)
+        self.wang_client.post(LIKE_BASE_URL, data)
+        response = self.wang_client.get(tweet_url)
+        self.assertEqual(response.data["likes_count"], 4)
+        tweet.refresh_from_db()
+        self.assertEqual(tweet.likes_count, 4)
+
+        response = self.summer_client.get(NEWSFEED_LIST_API)
+        self.assertEqual(response.data['results'][0]['tweet']['likes_count'], 4)
+
+        response = self.wang_client.get(NEWSFEED_LIST_API)
+        self.assertEqual(response.data['results'][0]['tweet']['likes_count'], 4)
+
+        self.wang_client.post(CANCEL_BASE_URL, data)
+        response = self.summer_client.get(NEWSFEED_LIST_API)
+        self.assertEqual(response.data['results'][0]['tweet']['likes_count'], 3)
+
+        response = self.wang_client.get(NEWSFEED_LIST_API)
+        self.assertEqual(response.data['results'][0]['tweet']['likes_count'], 3)
+
+        response = self.wang_client.get(tweet_url)
+        self.assertEqual(response.data["likes_count"], 3)
+        tweet.refresh_from_db()
+        self.assertEqual(tweet.likes_count, 3)
+
 
 
 

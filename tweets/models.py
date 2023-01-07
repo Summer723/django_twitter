@@ -9,6 +9,7 @@ from django.db.models.signals import pre_save, post_delete, post_save
 from utils.listeners import invalidate_object_cache
 from tweets.listeners import push_tweet_to_cache
 
+
 # Create your models here.
 class Tweet(models.Model):
     user = models.ForeignKey(
