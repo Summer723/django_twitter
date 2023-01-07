@@ -3,28 +3,16 @@ from newsfeeds.models import NewsFeed
 from utils.redis_client import RedisClient
 from django_twitter.cache import USER_NEWSFEEDS_PATTERN
 from utils.redis_helper import RedisHelper
+from newsfeeds.tasks import fanout_newsfeeds_task
 
 
 class NewsFeedService(object):
 
     @classmethod
     def fanout_to_followers(cls, tweet):
-        followers = FriendshipService.get_followers(tweet.user)
+        fanout_newsfeeds_task.delay(tweet.id)
 
-        # for + query will be really SLOW
-        # for follower in followers:
-        #     NewsFeed.objects.create(user=follower, tweet=tweet)
-        # better if you bulk-create newsfeeds
-        newsfeeds = [
-            NewsFeed(user=follower, tweet=tweet)
-            for follower in followers
-        ]
-        newsfeeds.append(NewsFeed(user=tweet.user, tweet=tweet))
-        # bulk_create will not trigger post_save()
-        NewsFeed.objects.bulk_create(newsfeeds)
 
-        for newsfeed in newsfeeds:
-            cls.push_newsfeed_to_cache(newsfeed)
 
     @classmethod
     def push_newsfeed_to_cache(cls, newsfeed):
