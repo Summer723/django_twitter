@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 import sys
 from pathlib import Path
+from kombu import Queue
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -187,3 +188,8 @@ except:
 CELERY_BROKER_URL = 'redis://127.0.0.1:6379/2' if not TESTING else 'redis://127.0.0.1:6379/0'
 CELERY_TIMEZONE = "UTC"
 CELERY_TASK_ALWAYS_EAGER = TESTING
+
+CELERY_QUEUES = (
+    Queue("default", routing_key='default'),
+    Queue("newsfeed", routing_key='newsfeed'),
+)
