@@ -3,15 +3,14 @@ from newsfeeds.models import NewsFeed
 from utils.redis_client import RedisClient
 from django_twitter.cache import USER_NEWSFEEDS_PATTERN
 from utils.redis_helper import RedisHelper
-from newsfeeds.tasks import fanout_newsfeeds_task
+from newsfeeds.tasks import fanout_newsfeeds_main_task
 
 
 class NewsFeedService(object):
 
     @classmethod
     def fanout_to_followers(cls, tweet):
-        fanout_newsfeeds_task.delay(tweet.id)
-
+        fanout_newsfeeds_main_task.delay(tweet.id, tweet.user_id)
 
 
     @classmethod
