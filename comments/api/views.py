@@ -9,8 +9,8 @@ from comments.api.serializers import (
 )
 from utils.permissions import IsObjectOwner
 from inbox.services import NotificationService
-
-
+from ratelimit.decorators import ratelimit
+from django.utils.decorators import method_decorator
 
 
 class CommentViewSet(viewsets.GenericViewSet):
@@ -24,7 +24,7 @@ class CommentViewSet(viewsets.GenericViewSet):
             return [IsAuthenticated(), IsObjectOwner()]
         return [AllowAny()]
 
-
+    @method_decorator(ratelimit(key='user', rate='1/s', method='GET', block=True))
     def list(self, request, *args, **kwargs):
         if "tweet_id" not in request.query_params:
             return Response({
@@ -38,11 +38,12 @@ class CommentViewSet(viewsets.GenericViewSet):
 
         serializer = CommentSerializer(
             comments,
-            context={'request':request},
+            context={'request': request},
             many=True,
         )
         return Response({'comments': serializer.data}, status=status.HTTP_200_OK)
 
+    @method_decorator(ratelimit(key='user', rate='3/s', method='POST', block=True))
     def create(self, request, *args, **kwargs):
         data = {
             'user_id': request.user.id,
@@ -65,10 +66,10 @@ class CommentViewSet(viewsets.GenericViewSet):
             status=status.HTTP_201_CREATED,
         )
 
-
+    @method_decorator(ratelimit(key='user', rate='3/s', method='POST', block=True))
     def update(self, request, *args, **kwargs):
         serializer = CommentSerializerForUpdate(
-            # get_object will find the object or it will report an error
+            # get_object will find the object, or it will report an error
             instance=self.get_object(),
             data=request.data,
         )
@@ -87,9 +88,8 @@ class CommentViewSet(viewsets.GenericViewSet):
             status=status.HTTP_200_OK,
         )
 
+    @method_decorator(ratelimit(key='user', rate='3/s', method='POST', block=True))
     def destroy(self, request, *args, **kwargs):
         comment = self.get_object()
         comment.delete()
         return Response({'success': True}, status=status.HTTP_200_OK)
-
-

@@ -8,7 +8,8 @@ from tweets.models import Tweet
 from newsfeeds.services import NewsFeedService
 from utils.paginations import EndlessPagination
 from tweets.services import TweetService
-
+from django.utils.decorators import method_decorator
+from ratelimit.decorators import ratelimit
 
 
 # 尽量少用ModelViewSet 因为不是每个人都有增删查改的权限
@@ -24,10 +25,13 @@ class TweetViewSet(viewsets.GenericViewSet,
             return [AllowAny()]
         return [IsAuthenticated()]
 
+    @method_decorator(ratelimit(key='user_or_ip', rate='3/s', method='GET', block=True))
     def retrieve(self, request, *args, **kwargs):
         tweet = self.get_object()
         return Response(TweetSerializerForDetails(tweet, context={'request': request}).data)
 
+    @method_decorator(ratelimit(key='user', rate='1/s', method='POST', block=True))
+    @method_decorator(ratelimit(key='user', rate='5/m', method='POST', block=True))
     def list(self, request):
         if "user_id" not in request.query_params:
             return Response('Missing user_id', status=400)

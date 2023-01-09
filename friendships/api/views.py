@@ -11,6 +11,8 @@ from friendships.api.serializers import (
 from django.contrib.auth.models import User
 from utils.paginations import MyPagination
 from friendships.services import FriendshipService
+from ratelimit.decorators import ratelimit
+from django.utils.decorators import method_decorator
 
 
 class FriendshipViewSet(viewsets.GenericViewSet):
@@ -22,6 +24,7 @@ class FriendshipViewSet(viewsets.GenericViewSet):
     # get the follower of 1
     # /api/friendships/1/followers/
     @action(methods=["GET"], detail=True, permission_classes=[AllowAny])
+    @method_decorator(ratelimit(key="user_or_ip", method="GET", rate="3/s", block=True))
     def followers(self, request, pk):
         friendships = Friendship.objects.filter(to_user_id=pk).order_by('-created_at')
         page = self.paginate_queryset(friendships)
@@ -29,6 +32,7 @@ class FriendshipViewSet(viewsets.GenericViewSet):
         return self.get_paginated_response(serializer.data)
 
     @action(methods=["GET"], detail=True, permission_classes=[AllowAny])
+    @method_decorator(ratelimit(key="user_or_ip", method="GET", rate="3/s", block=True))
     def followings(self, request, pk):
         friendships = Friendship.objects.filter(from_user_id=pk).order_by('-created_at')
         page = self.paginate_queryset(friendships)
@@ -37,6 +41,7 @@ class FriendshipViewSet(viewsets.GenericViewSet):
 
 
     @action(methods=["POST"], detail=True, permission_classes=[IsAuthenticated])
+    @method_decorator(ratelimit(key="user", method="POST", rate="10/s", block=True))
     def follow(self, request, pk):
         # if you want to check whether the user I am trying to follow exists
         # self.get_object() will try to find object using "pk"
@@ -72,6 +77,7 @@ class FriendshipViewSet(viewsets.GenericViewSet):
         )
 
     @action(methods=["POST"], detail=True, permission_classes=[IsAuthenticated])
+    @method_decorator(ratelimit(key="user", method="POST", rate="10/s", block=True))
     def unfollow(self, request, pk):
         unfollow_user = self.get_object()
         if request.user.id == unfollow_user.id:
