@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User
 from rest_framework import viewsets
 from rest_framework import permissions
 from rest_framework.decorators import action
@@ -17,6 +17,8 @@ from django.contrib.auth import (
     authenticate as django_authenticate,
      )
 from utils.permissions import IsObjectOwner
+from django.utils.decorators import method_decorator
+from ratelimit.decorators import ratelimit
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -30,11 +32,12 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class AccountViewSet(viewsets.ViewSet):
 
-    #serializer_class = LoginSerializer
+    # serializer_class = LoginSerializer
     serializer_class = SignupSerializer
     # if you want to define some functionality on the object then detail = true
 
     @action(methods=['GET'], detail=False)
+    @method_decorator(ratelimit(key='user', rate='3/s', method='GET', block=True))
     def login_status(self, request):
         data = {'has_logged_in': request.user.is_authenticated}
         if request.user.is_authenticated:
@@ -43,11 +46,13 @@ class AccountViewSet(viewsets.ViewSet):
         return Response(data)
 
     @action(methods=['POST'], detail=False)
+    @method_decorator(ratelimit(key='ip', rate='3/s', method='POST', block=True))
     def logout(self, request):
         django_logout(request)
         return Response({"Success": True})
 
     @action(methods=['POST'], detail=False)
+    @method_decorator(ratelimit(key="ip", rate="3/s", method="POST", block=True))
     def login(self, request):
         serializer = LoginSerializer(data=request.data)
         if not serializer.is_valid():
@@ -79,6 +84,7 @@ class AccountViewSet(viewsets.ViewSet):
         })
 
     @action(methods=['POST'], detail=False)
+    @method_decorator(ratelimit(key="ip", rate="3/s", method="POST", block=True))
     def signup(self, request):
         serializer = SignupSerializer(data=request.data)
         if not serializer.is_valid():
@@ -90,7 +96,6 @@ class AccountViewSet(viewsets.ViewSet):
         user = serializer.save()
         django_login(request, user)
 
-
         return Response({
             'success': True,
             'user': UserSerializer(user).data,
@@ -98,6 +103,6 @@ class AccountViewSet(viewsets.ViewSet):
 
 
 class UserProfileViewSet(viewsets.GenericViewSet, viewsets.mixins.UpdateModelMixin,):
-    queryset =  UserProfile
+    queryset = UserProfile
     permission_classes = (permissions.IsAuthenticated, IsObjectOwner,)
     serializer_class = UserProfileSerializerForUpdate
