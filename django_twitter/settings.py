@@ -29,6 +29,9 @@ DEBUG = True
 ALLOWED_HOSTS = ['127.0.0.1', '192.168.33.10', 'localhost']
 INTERNAL_IPS = ['127.0.0.1', '192.168.33.10', 'localhost']
 
+# add hbase host
+HBASE_HOST = '127.0.0.1'
+
 # Application definition
 
 INSTALLED_APPS = [
